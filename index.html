@@ -183,6 +183,66 @@ h1 {
   opacity: 0.5;
 }
 
+.drawbox {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  height: min(52vh, 470px);
+  touch-action: none;
+  cursor: crosshair;
+  margin-bottom: 18px;
+}
+
+#drawCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.swatch {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 5px solid rgba(255,255,255,0.85);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.swatch.active {
+  border-color: #333;
+  transform: scale(1.15);
+}
+
+.drawtools {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.toolbtn {
+  background: #fff;
+  color: #764ba2;
+  border: none;
+  border-radius: 25px;
+  padding: 16px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+}
+
 @media (min-width: 601px) and (max-width: 1024px) {
   .container { padding: 30px; }
   h1 { font-size: 2.6rem; }
@@ -225,6 +285,7 @@ h1 {
     <button class="tab" onclick="showSection('numbers')">🔢 Números</button>
     <button class="tab" onclick="showSection('colors')">🎨 Colores</button>
     <button class="tab" onclick="showSection('animals')">🐾 Animales</button>
+    <button class="tab" onclick="showSection('draw')">🖌️ Dibujar</button>
   </div>
 
   <div id="vowels" class="section">
@@ -241,6 +302,17 @@ h1 {
 
   <div id="animals" class="section hidden">
     <div class="grid" id="animalsGrid"></div>
+  </div>
+
+  <div id="draw" class="section hidden">
+    <div class="drawbox" id="drawBox">
+      <canvas id="drawCanvas"></canvas>
+    </div>
+    <div class="palette" id="palette"></div>
+    <div class="drawtools">
+      <button class="toolbtn" id="clearBtn" onclick="clearCanvas()">🧽 Limpiar</button>
+      <button class="toolbtn" id="stampBtn" onclick="insertStamp()">🎉 Confeti</button>
+    </div>
   </div>
 </div>
 
@@ -317,6 +389,7 @@ function showSection(id) {
   document.getElementById(id).classList.remove('hidden');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
+  if (id === 'draw') requestAnimationFrame(fitCanvas);
 }
 
 const vowels = [
@@ -432,6 +505,89 @@ function buildAnimals() {
     ));
   });
 }
+
+let drawing = false;
+let lastX = 0, lastY = 0;
+let drawColor = colors[0].hex;
+
+const drawCanvas = document.getElementById('drawCanvas');
+const drawCtx = drawCanvas.getContext('2d');
+drawCtx.lineCap = 'round';
+drawCtx.lineJoin = 'round';
+drawCtx.lineWidth = 14;
+
+function fitCanvas() {
+  const box = document.getElementById('drawBox');
+  const rect = box.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  drawCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  drawCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawCtx.fillStyle = '#ffffff';
+  drawCtx.fillRect(0, 0, rect.width, rect.height);
+  drawCtx.lineWidth = 14;
+}
+
+function posFromEvent(e) {
+  const r = drawCanvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+drawCanvas.addEventListener('pointerdown', e => {
+  drawing = true;
+  drawCanvas.setPointerCapture(e.pointerId);
+  const p = posFromEvent(e);
+  lastX = p.x; lastY = p.y;
+  drawCtx.strokeStyle = drawColor;
+  drawCtx.beginPath();
+  drawCtx.moveTo(lastX, lastY);
+});
+
+drawCanvas.addEventListener('pointermove', e => {
+  if (!drawing) return;
+  const p = posFromEvent(e);
+  drawCtx.lineTo(p.x, p.y);
+  drawCtx.strokeStyle = drawColor;
+  drawCtx.stroke();
+  lastX = p.x; lastY = p.y;
+});
+
+const stopDrawing = e => { drawing = false; };
+drawCanvas.addEventListener('pointerup', stopDrawing);
+drawCanvas.addEventListener('pointercancel', stopDrawing);
+
+function buildPalette() {
+  const palette = document.getElementById('palette');
+  colors.forEach((c, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (i === 0 ? ' active' : '');
+    sw.style.background = c.hex;
+    sw.onclick = () => {
+      drawColor = c.hex;
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+    };
+    palette.appendChild(sw);
+  });
+}
+
+function clearCanvas() {
+  const r = drawCanvas.getBoundingClientRect();
+  drawCtx.fillStyle = '#ffffff';
+  drawCtx.fillRect(0, 0, r.width, r.height);
+  createConfetti();
+}
+
+function insertStamp() {
+  const r = drawCanvas.getBoundingClientRect();
+  const x = (Math.random() * 0.7 + 0.15) * r.width;
+  const y = (Math.random() * 0.7 + 0.15) * r.height;
+  const stars = ['⭐', '🌸', '☀️', '🌈', '❤️', '🦋', '🎵'];
+  drawCtx.font = Math.max(30, r.width * 0.1) + 'px sans-serif';
+  drawCtx.fillText(stars[Math.floor(Math.random() * stars.length)], x, y);
+}
+
+buildPalette();
 
 buildVowels();
 buildNumbers();
