@@ -243,6 +243,42 @@ h1 {
   box-shadow: 0 5px 12px rgba(0,0,0,0.2);
 }
 
+.toolbtn.active {
+  background: #764ba2;
+  color: #fff;
+}
+
+.sizebar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.92);
+  padding: 12px 20px;
+  border-radius: 40px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+}
+
+.sizebar label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #764ba2;
+}
+
+.sizebar input {
+  width: clamp(90px, 28vw, 200px);
+  accent-color: #764ba2;
+}
+
+.sizebar span {
+  font-weight: bold;
+  color: #764ba2;
+}
+
 @media (min-width: 601px) and (max-width: 1024px) {
   .container { padding: 30px; }
   h1 { font-size: 2.6rem; }
@@ -308,8 +344,15 @@ h1 {
     <div class="drawbox" id="drawBox">
       <canvas id="drawCanvas"></canvas>
     </div>
-    <div class="palette" id="palette"></div>
+      <div class="palette" id="palette"></div>
+    <div class="sizebar">
+      <label for="sizeRange">Grosor:</label>
+      <input type="range" id="sizeRange" min="4" max="60" step="2" value="14" />
+      <span id="sizeLabel">14px</span>
+    </div>
     <div class="drawtools">
+      <button class="toolbtn active" id="brushBtn" onclick="setTool('brush')">🖊️ Lápiz</button>
+      <button class="toolbtn" id="eraserBtn" onclick="setTool('eraser')">🧺 Borrador</button>
       <button class="toolbtn" id="clearBtn" onclick="clearCanvas()">🧽 Limpiar</button>
       <button class="toolbtn" id="stampBtn" onclick="insertStamp()">🎉 Confeti</button>
     </div>
@@ -509,12 +552,15 @@ function buildAnimals() {
 let drawing = false;
 let lastX = 0, lastY = 0;
 let drawColor = colors[0].hex;
+let drawWidth = 14;
+let drawTool = 'brush';
+let bgCanvasColor = '#ffffff';
 
 const drawCanvas = document.getElementById('drawCanvas');
 const drawCtx = drawCanvas.getContext('2d');
 drawCtx.lineCap = 'round';
 drawCtx.lineJoin = 'round';
-drawCtx.lineWidth = 14;
+drawCtx.lineWidth = drawWidth;
 
 function fitCanvas() {
   const box = document.getElementById('drawBox');
@@ -523,9 +569,9 @@ function fitCanvas() {
   drawCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
   drawCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
   drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawCtx.fillStyle = '#ffffff';
+  drawCtx.fillStyle = bgCanvasColor;
   drawCtx.fillRect(0, 0, rect.width, rect.height);
-  drawCtx.lineWidth = 14;
+  drawCtx.lineWidth = drawWidth;
 }
 
 function posFromEvent(e) {
@@ -546,8 +592,11 @@ drawCanvas.addEventListener('pointerdown', e => {
 drawCanvas.addEventListener('pointermove', e => {
   if (!drawing) return;
   const p = posFromEvent(e);
+  drawCtx.beginPath();
+  drawCtx.moveTo(lastX, lastY);
   drawCtx.lineTo(p.x, p.y);
-  drawCtx.strokeStyle = drawColor;
+  drawCtx.lineWidth = drawWidth;
+  drawCtx.strokeStyle = drawTool === 'eraser' ? bgCanvasColor : drawColor;
   drawCtx.stroke();
   lastX = p.x; lastY = p.y;
 });
@@ -586,6 +635,21 @@ function insertStamp() {
   drawCtx.font = Math.max(30, r.width * 0.1) + 'px sans-serif';
   drawCtx.fillText(stars[Math.floor(Math.random() * stars.length)], x, y);
 }
+
+function setTool(t) {
+  drawTool = t;
+  document.getElementById('brushBtn').classList.toggle('active', t === 'brush');
+  document.getElementById('eraserBtn').classList.toggle('active', t === 'eraser');
+}
+
+function updateSize() {
+  const r = document.getElementById('sizeRange');
+  drawWidth = parseInt(r.value, 10);
+  document.getElementById('sizeLabel').textContent = drawWidth + 'px';
+}
+
+document.getElementById('sizeRange').addEventListener('input', updateSize);
+updateSize();
 
 buildPalette();
 
