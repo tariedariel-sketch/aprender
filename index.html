@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Mis Palabras - Aprender con Papá</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" href="icons/icon-192.png" />
+<meta name="theme-color" content="#764ba2" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Aprender" />
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #fff;
+  font-size: 2.2rem;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+  margin-bottom: 20px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 15px 25px;
+  border: none;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.3);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.tab.active {
+  background: #fff;
+  color: #764ba2;
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.card:active {
+  transform: scale(0.95);
+}
+
+.card .emoji {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.card .label {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.card .sublabel {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+.card.vowel { border-bottom: 5px solid #ff6b6b; }
+.vowel-big {
+  font-size: 7rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #764ba2;
+  display: block;
+  text-shadow: 4px 4px 0 rgba(255,107,107,0.35);
+}
+#vowelsGrid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.card.number { border-bottom: 5px solid #4ecdc4; }
+.card.color-card { border-bottom: 5px solid #ffe66d; }
+.card.animal { border-bottom: 5px solid #95e1d3; }
+
+.color-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 15px;
+  box-shadow: inset -5px -5px 15px rgba(0,0,0,0.2);
+}
+
+.hidden { display: none; }
+
+.stars {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.95);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #764ba2;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+
+.confetti {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  animation: fall 1.5s ease-in forwards;
+  z-index: 1000;
+}
+
+@keyframes fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
+
+.speaker {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .container { padding: 30px; }
+  h1 { font-size: 2.6rem; }
+  .tab { padding: 18px 32px; font-size: 1.3rem; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { padding: 30px; }
+  .card .emoji { font-size: 5rem; }
+  .card .label { font-size: 2.2rem; }
+  .vowel-big { font-size: 9rem; }
+  .color-circle { width: 110px; height: 110px; }
+  .stars { font-size: 1.6rem; padding: 14px 26px; }
+}
+
+@media (min-width: 1025px) {
+  .grid { grid-template-columns: repeat(4, 1fr); }
+  #vowelsGrid { grid-template-columns: repeat(5, 1fr); }
+  .vowel-big { font-size: 8rem; }
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  .tab { padding: 12px 18px; font-size: 1rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .card .emoji { font-size: 3rem; }
+  .card .label { font-size: 1.5rem; }
+  .vowel-big { font-size: 5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars">⭐ <span id="starCount">0</span></div>
+
+<div class="container">
+  <h1>🎈 Aprender es Divertido 🎈</h1>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('vowels')">🔤 Vocales</button>
+    <button class="tab" onclick="showSection('numbers')">🔢 Números</button>
+    <button class="tab" onclick="showSection('colors')">🎨 Colores</button>
+    <button class="tab" onclick="showSection('animals')">🐾 Animales</button>
+  </div>
+
+  <div id="vowels" class="section">
+    <div class="grid" id="vowelsGrid"></div>
+  </div>
+
+  <div id="numbers" class="section hidden">
+    <div class="grid" id="numbersGrid"></div>
+  </div>
+
+  <div id="colors" class="section hidden">
+    <div class="grid" id="colorsGrid"></div>
+  </div>
+
+  <div id="animals" class="section hidden">
+    <div class="grid" id="animalsGrid"></div>
+  </div>
+</div>
+
+<script>
+let stars = 0;
+const synth = window.speechSynthesis;
+let teacherVoice = null;
+
+function pickTeacherVoice() {
+  const voices = synth.getVoices();
+  if (!voices.length) return;
+
+  const femaleNames = ['paulina', 'monica', 'mónica', 'helena', 'laura', 'catalina', 'sofia', 'sofía', 'carmen', 'lucia', 'lucía', 'marisol', 'isidora', 'esperanza', 'female', 'mujer', 'mujerita', 'michelle', 'ximena', 'camila', 'valentina', 'google español'];
+
+  const esVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
+
+  const score = v => {
+    let s = 0;
+    const lang = v.lang.toLowerCase();
+    const name = v.name.toLowerCase();
+    if (lang.includes('es-mx') || lang.includes('es-419') || lang.includes('es-us')) s += 10;
+    if (lang.includes('es-co') || lang.includes('es-ar') || lang.includes('es-cl')) s += 8;
+    if (femaleNames.some(f => name.includes(f))) s += 6;
+    if (v.localService) s += 2;
+    return s;
+  };
+
+  esVoices.sort((a, b) => score(b) - score(a));
+  if (esVoices.length) teacherVoice = esVoices[0];
+}
+
+pickTeacherVoice();
+if (typeof speechSynthesis !== 'undefined') {
+  synth.onvoiceschanged = pickTeacherVoice;
+}
+
+function speak(text) {
+  synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-MX';
+  if (teacherVoice) {
+    utter.voice = teacherVoice;
+    utter.lang = teacherVoice.lang;
+  }
+  utter.rate = 0.75;
+  utter.pitch = 1.15;
+  utter.volume = 1;
+  synth.speak(utter);
+}
+
+function addStar() {
+  stars++;
+  document.getElementById('starCount').textContent = stars;
+  createConfetti();
+}
+
+function createConfetti() {
+  const emojis = ['⭐', '🌟', '✨', '💫', '🎉'];
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-2rem';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }, i * 100);
+  }
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+const vowels = [
+  { show: 'A', say: 'A' },
+  { show: 'E', say: 'E' },
+  { show: 'i', say: 'I' },
+  { show: 'O', say: 'O' },
+  { show: 'U', say: 'U' }
+];
+
+const numbers = [
+  { n: 1, emoji: '1️⃣' }, { n: 2, emoji: '2️⃣' }, { n: 3, emoji: '3️⃣' },
+  { n: 4, emoji: '4️⃣' }, { n: 5, emoji: '5️⃣' }, { n: 6, emoji: '6️⃣' },
+  { n: 7, emoji: '7️⃣' }, { n: 8, emoji: '8️⃣' }, { n: 9, emoji: '9️⃣' },
+  { n: 10, emoji: '🔟' }
+];
+
+const numWords = ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez'];
+
+const colors = [
+  { name: 'Rojo', hex: '#ff4757' },
+  { name: 'Azul', hex: '#3742fa' },
+  { name: 'Amarillo', hex: '#ffa502' },
+  { name: 'Verde', hex: '#2ed573' },
+  { name: 'Naranja', hex: '#ff6348' },
+  { name: 'Morado', hex: '#a55eea' },
+  { name: 'Rosa', hex: '#ff6b81' },
+  { name: 'Café', hex: '#8b4513' }
+];
+
+const animals = [
+  { name: 'Perro', emoji: '🐕', sound: 'El perro dice: guau guau guau' },
+  { name: 'Gato', emoji: '🐈', sound: 'El gato dice: miau miau miau' },
+  { name: 'Vaca', emoji: '🐄', sound: 'La vaca dice: muuu muuu muuu' },
+  { name: 'Cerdo', emoji: '🐖', sound: 'El cerdo dice: oinc oinc oinc' },
+  { name: 'Gallina', emoji: '🐓', sound: 'La gallina dice: cocorocó cocorocó' },
+  { name: 'Cordero', emoji: '🐑', sound: 'El cordero dice: bee bee bee' },
+  { name: 'Caballo', emoji: '🐎', sound: 'El caballo dice: ihuuu ihuuu' },
+  { name: 'Pato', emoji: '🦆', sound: 'El pato dice: cuac cuac cuac' },
+  { name: 'Rana', emoji: '🐸', sound: 'La rana dice: croac croac croac' },
+  { name: 'León', emoji: '🦁', sound: 'El león dice: roar roar roar' },
+  { name: 'Elefante', emoji: '🐘', sound: 'El elefante dice: paaaaaa' },
+  { name: 'Pájaro', emoji: '🐦', sound: 'El pájaro dice: pío pío pío' }
+];
+
+function createCard(className, inner, onClick) {
+  const card = document.createElement('div');
+  card.className = 'card ' + className;
+  card.innerHTML = '<span class="speaker">🔊</span>' + inner;
+  card.onclick = () => { onClick(); addStar(); };
+  return card;
+}
+
+function buildVowels() {
+  const grid = document.getElementById('vowelsGrid');
+  vowels.forEach(v => {
+    grid.appendChild(createCard('vowel',
+      `<span class="vowel-big">${v.show}</span>`,
+      () => speak(v.say)
+    ));
+  });
+}
+
+function buildNumbers() {
+  const grid = document.getElementById('numbersGrid');
+  numbers.forEach((num, i) => {
+    grid.appendChild(createCard('number',
+      `<span class="emoji">${num.emoji}</span><span class="label">${num.n}</span><div class="sublabel">${numWords[i]}</div>`,
+      () => speak(numWords[i])
+    ));
+  });
+}
+
+function buildColors() {
+  const grid = document.getElementById('colorsGrid');
+  colors.forEach(c => {
+    grid.appendChild(createCard('color-card',
+      `<div class="color-circle" style="background:${c.hex}"></div><span class="label">${c.name}</span>`,
+      () => speak(`Color ${c.name}`)
+    ));
+  });
+}
+
+function buildAnimals() {
+  const grid = document.getElementById('animalsGrid');
+  animals.forEach(a => {
+    grid.appendChild(createCard('animal',
+      `<span class="emoji">${a.emoji}</span><span class="label">${a.name}</span><div class="sublabel">Toca para oír</div>`,
+      () => speak(a.sound)
+    ));
+  });
+}
+
+buildVowels();
+buildNumbers();
+buildColors();
+buildAnimals();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
