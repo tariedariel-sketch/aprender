@@ -322,6 +322,7 @@ h1 {
     <button class="tab" onclick="showSection('colors')">🎨 Colores</button>
     <button class="tab" onclick="showSection('animals')">🐾 Animales</button>
     <button class="tab" onclick="showSection('draw')">🖌️ Dibujar</button>
+    <button class="tab" onclick="showSection('shapes')">🔺 Formas</button>
   </div>
 
   <div id="vowels" class="section">
@@ -340,11 +341,11 @@ h1 {
     <div class="grid" id="animalsGrid"></div>
   </div>
 
-  <div id="draw" class="section hidden">
+<div id="draw" class="section hidden">
     <div class="drawbox" id="drawBox">
       <canvas id="drawCanvas"></canvas>
     </div>
-      <div class="palette" id="palette"></div>
+    <div class="palette" id="palette"></div>
     <div class="sizebar">
       <label for="sizeRange">Grosor:</label>
       <input type="range" id="sizeRange" min="4" max="60" step="2" value="14" />
@@ -356,6 +357,10 @@ h1 {
       <button class="toolbtn" id="clearBtn" onclick="clearCanvas()">🧽 Limpiar</button>
       <button class="toolbtn" id="stampBtn" onclick="insertStamp()">🎉 Confeti</button>
     </div>
+  </div>
+
+  <div id="shapes" class="section hidden">
+    <div class="grid" id="shapesGrid"></div>
   </div>
 </div>
 
@@ -651,12 +656,34 @@ function updateSize() {
 document.getElementById('sizeRange').addEventListener('input', updateSize);
 updateSize();
 
+const shapes = [
+  { name: 'Círculo', emoji: '⚪', say: 'Círculo' },
+  { name: 'Cuadrado', emoji: '⬜', say: 'Cuadrado' },
+  { name: 'Triángulo', emoji: '🔺', say: 'Triángulo' },
+  { name: 'Rectángulo', emoji: '▭', say: 'Rectángulo' },
+  { name: 'Óvalo', emoji: '🔵', say: 'Óvalo' },
+  { name: 'Estrella', emoji: '⭐', say: 'Estrella' },
+  { name: 'Corazón', emoji: '❤️', say: 'Corazón' },
+  { name: 'Rombo', emoji: '◆', say: 'Rombo' }
+];
+
+function buildShapes() {
+  const grid = document.getElementById('shapesGrid');
+  shapes.forEach(s => {
+    grid.appendChild(createCard('shape',
+      `<span class="emoji">${s.emoji}</span><span class="label">${s.name}</span>`,
+      () => speak(s.say)
+    ));
+  });
+}
+
 buildPalette();
 
 buildVowels();
 buildNumbers();
 buildColors();
 buildAnimals();
+buildShapes();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
