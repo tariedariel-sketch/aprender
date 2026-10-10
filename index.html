@@ -42,15 +42,7 @@ h1 {
   50% { transform: translateY(-10px); }
 }
 
-.tabs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-}
-
-.tab {
+button.tab {
   padding: 15px 25px;
   border: none;
   border-radius: 25px;
@@ -61,6 +53,18 @@ h1 {
   cursor: pointer;
   transition: all 0.3s;
   font-family: inherit;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 4px;
 }
 
 .tab.active {
